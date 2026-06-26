@@ -1,11 +1,11 @@
 {
-  "name": "Premium Kosher Tours CRM v4",
+  "name": "Premium Kosher Tours CRM",
   "short_name": "PKT CRM",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#0b1730",
-  "theme_color": "#0b1730",
-  "description": "Offline Teigman-style itinerary, quote and invoice builder with 2026 cost reference",
+  "background_color": "#0B1730",
+  "theme_color": "#0B1730",
+  "description": "Offline Teigman-style quote, itinerary, invoice and payment app for Premium Kosher Tours",
   "icons": [
     {
       "src": "logo.jpg",

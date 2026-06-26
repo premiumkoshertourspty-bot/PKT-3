@@ -1,4 +1,4 @@
-const CACHE_NAME = 'pkt-crm-v4-cost-reference';
+const CACHE_NAME = 'pkt-clean-v2';
 const FILES = ['./','./index.html','./manifest.json','./service-worker.js','./logo.jpg'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE_NAME).then(c => c.addAll(FILES)));
