@@ -47,19 +47,8 @@ button{font-family:inherit;cursor:pointer}.gold{background:linear-gradient(135de
 .totals{background:var(--navy);color:white;border-radius:12px;padding:14px;margin-top:12px}.totals div{display:flex;justify-content:space-between;padding:5px 0}.totals b{color:var(--gold2)}
 .toast{position:fixed;left:16px;right:16px;bottom:16px;background:var(--navy);color:white;padding:14px;border-left:5px solid var(--gold);border-radius:12px;z-index:50;text-align:center}
 @media(max-width:760px){.row,.three,.cards{grid-template-columns:1fr}.item-card{display:block}.actions{justify-content:flex-start;margin-top:10px}nav{top:calc(90px + env(safe-area-inset-top))}.act-row-top,.tr-row-top{grid-template-columns:1fr 1fr}}
-@media print{@page{size:letter;margin:0}body{background:#0B1730}header,nav,main>.screen:not(#printScreen){display:none!important}main{padding:0;max-width:none}#printScreen{display:block!important}.print-page{page-break-after:always;width:8.5in;height:11in;overflow:hidden}}
-.print-page{width:8.5in;height:11in;background:#172746;color:#EEF2FF;position:relative;padding:.58in .72in;border-top:8px solid var(--gold);border-bottom:8px solid var(--gold);font-family:Arial,Helvetica,sans-serif}
-.print-logo{width:128px;height:128px;object-fit:cover;display:block;margin:0 auto 20px}
-.cover-title{text-align:center;border-top:2px solid var(--gold);border-bottom:2px solid var(--gold);padding:22px 0;margin-top:8px}.cover-title h1{font-size:42px;color:white;margin:0 0 12px;letter-spacing:.04em;text-transform:uppercase}.cover-title h2{font-size:17px;color:var(--gold2);margin:0;letter-spacing:.12em;text-transform:uppercase;line-height:1.45}
-.cover-copy{text-align:center;color:#E9EEF8;font-size:14px;line-height:1.42;margin:22px auto;max-width:640px;border-bottom:1px solid var(--gold);padding-bottom:22px}
-.prepared{text-align:center;margin-top:28px;border-bottom:1px solid var(--gold);padding-bottom:28px}.prepared .small{color:var(--gold2);font-size:12px;font-weight:bold;text-transform:uppercase;letter-spacing:.12em}.prepared .name{color:var(--gold2);font-size:34px;font-weight:800;margin:12px 0}.prepared .meta{color:white;font-size:13px;line-height:1.5}.daily{text-align:center;color:var(--gold2);font-size:20px;font-weight:800;letter-spacing:.08em;margin-top:28px;text-transform:uppercase}
-.day-title{border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:10px 0;margin-bottom:16px;color:var(--gold2);font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}
-.activity-title{color:var(--gold2);font-size:14px;font-weight:800;text-transform:uppercase;margin:12px 0 6px}.print-page p{font-size:12px;line-height:1.42;margin:0 0 10px;color:#F1F5F9}
-.includes{margin:8px 0 10px;color:#F7F3E8}.includes b{color:var(--gold2);font-size:12px;text-transform:uppercase}.includes ul{margin:6px 0 0 18px;padding:0}.includes li{font-size:12px;margin:3px 0}
-.gold-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px;color:white}.gold-table th{border:1px solid rgba(226,201,107,.55);padding:7px;background:rgba(0,0,0,.12);color:var(--gold2);text-align:left}.gold-table td{border:1px solid rgba(226,201,107,.45);padding:7px}.gold-table .right{text-align:right}.gold-table .total td{font-weight:800;color:var(--gold2)}
-.reserve{border-left:4px solid var(--gold);padding-left:8px;color:var(--gold2);font-weight:800;margin-top:10px;font-size:12px}
-.schedule{position:absolute;left:.72in;right:.72in;bottom:.42in}.schedule-title{text-align:center;color:var(--gold2);font-size:10px;text-transform:uppercase;font-weight:800;margin-bottom:4px}.schedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.schedule-box{border:1px solid rgba(226,201,107,.45);padding:8px;text-align:center}.schedule-box div:first-child{color:var(--gold2);font-size:8px;text-transform:uppercase;letter-spacing:.15em}.schedule-box div:last-child{font-size:12px;color:white;font-weight:800}
-.summary-card{background:rgba(5,12,26,.35);padding:18px;margin-top:16px}.footer-note{position:absolute;bottom:.25in;left:.72in;right:.72in;color:#CBD5E1;font-size:9px;text-align:center}
+/* print preview placeholder — actual printing done via new window */
+#printScreen{display:none}
 </style>
 </head>
 <body>
@@ -372,17 +361,207 @@ function lineItems(q){
 }
 function calc(q){let rows=lineItems(q),before=rows.reduce((s,r)=>s+r.total,0),tax=before*TAX,total=before+tax;return{rows,before,tax,total,pp:total/(Number(q.pax||1)||1)}}
 function renderTotals(){let q=db.quotes.find(x=>String(x.id)===String(builderQuote.value));if(!q){builderTotals.innerHTML='';return}q.days=currentDays;let c=calc(q);builderTotals.innerHTML=`<div><span>People (Pax)</span><b>${q.pax}</b></div><div><span>Total Before Tax</span><b>${money(c.before)}</b></div><div><span>Tax 7%</span><b>${money(c.tax)}</b></div><div><span>Total After Tax</span><b>${money(c.total)}</b></div><div><span>Price Per Person</span><b>${money(c.pp)}</b></div>`}
+function printDoc(html){
+  const w=window.open('','_blank');
+  w.document.write(html);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>w.print(),800);
+}
+
+const PRINT_CSS=`
+*{box-sizing:border-box;margin:0;padding:0}
+@page{size:letter;margin:0}
+@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}.page{page-break-after:always}}
+body{background:#0B1730;font-family:Arial,Helvetica,sans-serif;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.page{width:8.5in;min-height:11in;background:#14254A;color:#EEF2FF;position:relative;padding:0;border-top:7px solid #C8A84B;border-bottom:7px solid #C8A84B;overflow:hidden;page-break-after:always}
+.page-inner{padding:.55in .68in;min-height:calc(11in - 14px)}
+
+/* ── COVER ── */
+.cover-logo{width:140px;height:140px;object-fit:cover;display:block;margin:0 auto 22px;border-radius:4px}
+.cover-rule{border:none;border-top:1.5px solid #C8A84B;margin:0}
+.cover-title-block{text-align:center;padding:22px 0;border-bottom:1.5px solid #C8A84B}
+.cover-h1{font-size:46px;font-weight:900;color:#FFFFFF;letter-spacing:.05em;text-transform:uppercase;margin-bottom:10px}
+.cover-badge{display:inline-flex;align-items:center;gap:8px;color:#E2C96B;font-size:13px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.cover-badge-bar{display:inline-block;width:28px;height:4px;background:#C8A84B}
+.cover-sub{font-size:13px;color:#E2C96B;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin-top:8px}
+.cover-copy{text-align:center;color:#D8E0F0;font-size:13.5px;line-height:1.55;margin:24px auto;max-width:580px;padding-bottom:24px;border-bottom:1.5px solid #C8A84B}
+.cover-copy b{color:#E2C96B}
+.prepared-label{text-align:center;color:#E2C96B;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;margin-top:28px;margin-bottom:10px}
+.prepared-name{text-align:center;color:#E2C96B;font-size:38px;font-weight:900;margin-bottom:12px}
+.prepared-meta{text-align:center;color:#D0D8EE;font-size:12.5px;line-height:1.7;padding-bottom:24px;border-bottom:1.5px solid #C8A84B}
+.daily-label{text-align:center;color:#E2C96B;font-size:18px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;margin-top:28px}
+
+/* ── DAY PAGES ── */
+.day-header{border-top:1.5px solid #C8A84B;border-bottom:1.5px solid #C8A84B;padding:9px 0;margin-bottom:16px}
+.day-header-text{color:#E2C96B;font-size:13px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.activity-title{color:#E2C96B;font-size:13px;font-weight:800;text-transform:uppercase;margin:14px 0 6px}
+.body-text{font-size:12px;line-height:1.5;color:#DDE4F5;margin-bottom:10px}
+.includes-label{color:#E2C96B;font-size:11px;font-weight:800;text-transform:uppercase;margin-bottom:5px}
+.includes-list{list-style:none;margin:0 0 10px 0;padding:0}
+.includes-list li{font-size:11.5px;color:#DDE4F5;padding:2px 0;padding-left:14px;position:relative}
+.includes-list li::before{content:'›';position:absolute;left:0;color:#C8A84B}
+
+/* ── TABLE ── */
+.gold-table{width:100%;border-collapse:collapse;margin-top:10px;font-size:11px}
+.gold-table th{padding:7px 8px;background:rgba(20,37,74,0.95);color:#E2C96B;text-align:left;border:1px solid rgba(200,168,75,.5);font-size:10px;text-transform:uppercase;letter-spacing:.08em}
+.gold-table td{padding:7px 8px;border:1px solid rgba(200,168,75,.35);color:#EEF2FF;vertical-align:middle}
+.gold-table tr.subtotal td{color:#AAB8D8;font-size:10.5px}
+.gold-table tr.tax-row td{color:#AAB8D8;font-size:10.5px}
+.gold-table tr.grand-total td{color:#E2C96B;font-weight:800;background:rgba(200,168,75,.08)}
+.right{text-align:right}
+.dash{text-align:center;color:#AAB8D8}
+.included-cell{color:#AAB8D8;font-style:italic;text-align:right}
+
+/* ── RESTAURANT / NOTE ── */
+.reserve-note{border-left:4px solid #C8A84B;padding:6px 10px;margin:12px 0;background:rgba(200,168,75,.07)}
+.reserve-title{color:#E2C96B;font-size:12px;font-weight:800}
+.reserve-sub{color:#AAB8D8;font-size:11px;margin-top:2px}
+
+/* ── SCHEDULE BOX ── */
+.schedule-wrap{position:absolute;left:.68in;right:.68in;bottom:.35in}
+.schedule-label{text-align:center;color:#E2C96B;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.18em;margin-bottom:5px}
+.schedule-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.schedule-box{border:1px solid rgba(200,168,75,.45);padding:9px;text-align:center;background:rgba(20,37,74,.6)}
+.schedule-box-label{color:#E2C96B;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;margin-bottom:4px}
+.schedule-box-val{color:#FFFFFF;font-size:13px;font-weight:800}
+
+/* ── FLIGHT BOX ── */
+.flight-label{text-align:center;color:#E2C96B;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.18em;margin:10px 0 5px}
+.flight-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.flight-box{border:1px solid rgba(200,168,75,.45);padding:8px;text-align:center;background:rgba(20,37,74,.6)}
+.flight-box-label{color:#E2C96B;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;margin-bottom:3px}
+.flight-box-val{color:#FFFFFF;font-size:12px;font-weight:800}
+
+/* ── SUMMARY PAGE ── */
+.summary-section-title{color:#E2C96B;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin:18px 0 6px}
+.kosher-note{margin-top:20px;padding-top:16px;border-top:1px solid rgba(200,168,75,.3)}
+.kosher-title{color:#E2C96B;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.kosher-body{font-size:11px;color:#AAB8D8;line-height:1.55}
+.contact-block{margin-top:16px;padding-top:12px;border-top:1px solid rgba(200,168,75,.3)}
+.contact-text{font-size:10px;color:#AAB8D8;text-align:center}
+.footer-abs{position:absolute;bottom:.22in;left:.68in;right:.68in;text-align:center;color:#7080A0;font-size:9px;border-top:1px solid rgba(200,168,75,.2);padding-top:6px}
+`;
+
+function tableFor(rows){
+  const sub=rows.reduce((s,r)=>s+r.total,0),tax=sub*0.07,total=sub+tax;
+  const dataRows=rows.map(r=>{
+    const isZero=r.total===0;
+    const isIncluded=r.unit===0&&!isZero;
+    return `<tr>
+      <td>${r.name}</td>
+      <td class="right">${isZero?'—':r.qty}</td>
+      <td class="${isIncluded?'included-cell':'right'}">${isIncluded?'Included':isZero?'—':money(r.unit)}</td>
+      <td class="right">${isZero?'$0.00':isIncluded?'—':money(r.total)}</td>
+    </tr>`;
+  }).join('');
+  return `<table class="gold-table">
+    <tr><th>Item</th><th class="right">Qty</th><th class="right">Unit Price</th><th class="right">Total</th></tr>
+    ${dataRows}
+    <tr class="subtotal"><td colspan="3" class="right" style="color:#AAB8D8">Tax (7%)</td><td class="right">${money(tax)}</td></tr>
+    <tr class="grand-total"><td colspan="3" style="font-weight:800">TOTAL</td><td class="right">${money(total)}</td></tr>
+  </table>`;
+}
+
+function proposalHTML(q,invoice=false,inv=null){
+  const client=db.clients.find(x=>String(x.id)===String(q.clientId))||{first:'Client',last:''};
+  const all=calc(q),rows=all.rows;
+  const clientFull=esc((client.first+' '+client.last).trim());
+
+  // ── COVER PAGE ──
+  const cover=`<div class="page"><div class="page-inner">
+    <img src="logo.jpg" class="cover-logo">
+    <hr class="cover-rule">
+    <div class="cover-title-block">
+      <div class="cover-h1">${invoice?'INVOICE':'TOUR ITINERARY'}</div>
+      <div class="cover-badge"><span class="cover-badge-bar"></span>PERSONALIZED PROGRAM<span class="cover-badge-bar"></span></div>
+      <div class="cover-sub">${esc(q.subtitle||'PANAMA CITY &amp; SURROUNDINGS')}</div>
+    </div>
+    <div class="cover-copy">${esc(q.notes||'Experience the best of Panama — crafted exclusively for you.')}</div>
+    <div class="prepared-label">Prepared For</div>
+    <div class="prepared-name">${clientFull}</div>
+    <div class="prepared-meta">
+      ${esc(q.hotel||'Panama City Hotel')}<br>
+      ${q.invoiceNo?'Invoice #'+esc(q.invoiceNo)+' · ':''}Contact: David Cohen<br>
+      premiumkoshertourspty@gmail.com · +507 6245-8980
+    </div>
+    <div class="daily-label">${invoice?'INVOICE DETAILS':'DAILY PROGRAM'}</div>
+  </div></div>`;
+
+  // ── DAY PAGES ──
+  const pages=(q.days||[]).map((d,i)=>{
+    const dr=rows.filter(r=>r.day===i+1);
+    const parts=(d.schedule||'').split('-');
+    const startT=(parts[0]||'').trim();
+    const endT=(parts[1]||'').trim();
+    return `<div class="page"><div class="page-inner">
+      <div class="day-header">
+        <div class="day-header-text">DAY ${i+1}${d.date?' · '+esc(d.date):''} — ${esc(d.title||'')}</div>
+      </div>
+      <div class="activity-title">${esc(d.title||'')}</div>
+      <div class="body-text">${esc(d.notes||'A curated Premium Kosher Tours experience in Panama.')}</div>
+      <div class="includes-label">✦ Includes</div>
+      <ul class="includes-list">${dr.map(r=>`<li>${esc(r.desc||r.name)}</li>`).join('')}</ul>
+      ${tableFor(dr)}
+      ${d.restaurant?`<div class="reserve-note"><div class="reserve-title">${esc(d.restaurant)}</div></div>`:''}
+      <div class="schedule-wrap">
+        <div class="schedule-label">Schedule</div>
+        <div class="schedule-grid">
+          <div class="schedule-box"><div class="schedule-box-label">Start Time</div><div class="schedule-box-val">${esc(startT)||'—'}</div></div>
+          <div class="schedule-box"><div class="schedule-box-label">End Time</div><div class="schedule-box-val">${esc(endT)||'—'}</div></div>
+        </div>
+      </div>
+    </div></div>`;
+  }).join('');
+
+  // ── SUMMARY PAGE ──
+  const paid=inv?Number(inv.paid||0):0;
+  const summary=`<div class="page"><div class="page-inner">
+    <div class="day-header">
+      <div class="day-header-text">${invoice?'INVOICE SUMMARY':'PACKAGE SUMMARY &amp; PRICING'}</div>
+    </div>
+    <table class="gold-table" style="margin-top:0">
+      <tr><th>Description</th><th class="right">Amount</th></tr>
+      <tr><td>Total Before Tax</td><td class="right">${money(all.before)}</td></tr>
+      <tr class="subtotal"><td>Tax (7% ITBMS)</td><td class="right">${money(all.tax)}</td></tr>
+      <tr class="grand-total"><td>Total After Tax</td><td class="right">${money(all.total)}</td></tr>
+      ${invoice
+        ?`<tr class="subtotal"><td>Amount Paid</td><td class="right">${money(paid)}</td></tr>
+           <tr class="grand-total"><td>Balance Due</td><td class="right">${money(all.total-paid)}</td></tr>`
+        :`<tr class="subtotal"><td>Price Per Person (${q.pax} pax)</td><td class="right">${money(all.pp)}</td></tr>`}
+    </table>
+    <div class="kosher-note">
+      <div class="kosher-title">Kosher Dining in Panama City</div>
+      <div class="kosher-body">Kosher food is readily available throughout Panama City, certified by the Vaadat Kashrut Shevet Achim. With over 30 certified kosher restaurants offering diverse options — meat, dairy, and parve — observant travelers can dine with full confidence. A wide selection of options in the Paitilla and Obarrio neighborhoods are within easy reach of your hotel.</div>
+    </div>
+    <div class="contact-block">
+      <div class="contact-text">David E. Cohen · +507 6245-8980 · premiumkoshertourspty@gmail.com</div>
+    </div>
+    <div class="footer-abs">Tours subject to availability · Total due within 10 days of invoice · Make all checks payable to PREMIUM KOSHER TOURS</div>
+  </div></div>`;
+
+  const body=invoice?cover+summary:cover+pages+summary;
+  return `<!DOCTYPE html><html><head><meta charset="utf-8"><title>PKT — ${clientFull}</title><style>${PRINT_CSS}</style></head><body>${body}</body></html>`;
+}
+
+function printProposal(){
+  saveItinerary();
+  const q=db.quotes.find(x=>String(x.id)===String(builderQuote.value));
+  if(!q)return alert('Select a quote first');
+  printDoc(proposalHTML(q,false,null));
+}
+function printInvoice(id){
+  const i=db.invoices.find(x=>x.id==id),q=db.quotes.find(x=>x.id==i.quoteId);
+  if(!i||!q)return;
+  printDoc(proposalHTML(q,true,i));
+}
 function quickPrint(id){builderQuote.value=id;loadQuoteDays();printProposal()}
-function tableFor(rows){let sub=rows.reduce((s,r)=>s+r.total,0),tax=sub*TAX,total=sub+tax;return `<table class="gold-table"><tr><th>Item</th><th class="right">Qty</th><th class="right">Unit Price</th><th class="right">Total</th></tr>${rows.map(r=>`<tr><td>${esc(r.name)}</td><td class="right">${r.qty}</td><td class="right">${money(r.unit)}</td><td class="right">${money(r.total)}</td></tr>`).join('')}<tr><td colspan="3">Total Before Tax</td><td class="right">${money(sub)}</td></tr><tr><td colspan="3">Tax (7%)</td><td class="right">${money(tax)}</td></tr><tr class="total"><td colspan="3">Total After Tax</td><td class="right">${money(total)}</td></tr></table>`}
-function proposalHTML(q,invoice=false,inv=null){let client=db.clients.find(x=>String(x.id)===String(q.clientId))||{first:'Client',last:''},all=calc(q),rows=all.rows;let cover=`<section class="print-page"><img src="logo.jpg" class="print-logo"><div class="cover-title"><h1>${invoice?'INVOICE':'TOUR ITINERARY'}</h1><h2>■■ PERSONALIZED PROGRAM ■■<br>${esc(q.subtitle||'PANAMA CITY & SURROUNDINGS')}</h2></div><div class="cover-copy">${esc(q.notes||'Experience the best of Panama, crafted exclusively for you.')}</div><div class="prepared"><div class="small">Prepared For</div><div class="name">${esc(client.first+' '+client.last)}</div><div class="meta">${esc(q.hotel||'Panama City Hotel')}<br>${q.invoiceNo?'Invoice '+esc(q.invoiceNo)+' · ':''}Contact: David Cohen<br>premiumkoshertourspty@gmail.com · +507 6245-8980</div></div><div class="daily">${invoice?'Invoice Details':'Daily Program'}</div></section>`;let pages=(q.days||[]).map((d,i)=>{let dr=rows.filter(r=>r.day===i+1);return `<section class="print-page"><div class="day-title">DAY ${i+1} ${d.date?'· '+esc(d.date):''} — ${esc(d.title||'')}</div><div class="activity-title">${esc(d.title||'')}</div><p>${esc(d.notes||'A curated Premium Kosher Tours experience in Panama.')}</p><div class="includes"><b>✦ Includes</b><ul>${dr.map(r=>`<li>${esc(r.desc||r.name)}</li>`).join('')}</ul></div>${tableFor(dr)}${d.restaurant?`<div class="reserve">${esc(d.restaurant)}</div>`:''}<div class="schedule"><div class="schedule-title">Schedule</div><div class="schedule-grid"><div class="schedule-box"><div>Start Time</div><div>${esc((d.schedule||'').split('-')[0]||'')}</div></div><div class="schedule-box"><div>End Time</div><div>${esc((d.schedule||'').split('-')[1]||'')}</div></div></div></div></section>`}).join('');let paid=inv?Number(inv.paid||0):0;let summary=`<section class="print-page"><div class="day-title">${invoice?'INVOICE SUMMARY':'PACKAGE SUMMARY & PRICING'}</div><div class="summary-card"><table class="gold-table"><tr><th>Category</th><th class="right">Amount</th></tr><tr><td>Total Before Tax</td><td class="right">${money(all.before)}</td></tr><tr><td>Tax (7%)</td><td class="right">${money(all.tax)}</td></tr><tr class="total"><td>Total After Tax</td><td class="right">${money(all.total)}</td></tr>${invoice?`<tr><td>Amount Paid</td><td class="right">${money(paid)}</td></tr><tr class="total"><td>Balance Due</td><td class="right">${money(all.total-paid)}</td></tr>`:`<tr><td>Price Per Person</td><td class="right">${money(all.pp)}</td></tr>`}</table></div><div class="reserve" style="margin-top:30px">KOSHER DINING IN PANAMA CITY</div><p>Kosher food is readily available throughout Panama City, with certified restaurants and delivery options. A curated restaurant list can be provided prior to arrival.</p><div class="footer-note">Tours subject to availability · Premium Kosher Tours · premiumkoshertourspty@gmail.com · +507 6245-8980</div></section>`;return invoice?cover+summary:cover+pages+summary}
-function printProposal(){saveItinerary();const q=db.quotes.find(x=>String(x.id)===String(builderQuote.value));if(!q)return;printScreen.innerHTML=proposalHTML(q,false,null);setTimeout(()=>window.print(),400)}
 function createInvoice(){saveItinerary();const q=db.quotes.find(x=>String(x.id)===String(builderQuote.value));if(!q)return alert('Select quote first');const c=calc(q);if(!db.invoices.find(i=>String(i.quoteId)===String(q.id))){db.invoices.push({id:idFor(db.invoices),quoteId:q.id,invoiceNo:q.invoiceNo||('PKT-'+String(1000+idFor(db.invoices))),status:'Draft',dueDate:'',total:c.total,paid:0,instructions:'Payment due according to agreed terms.'})}saveDB();show('invoices');toast('Invoice created')}
 function renderInvoices(){invoiceSelect.innerHTML='<option value="">Select invoice...</option>'+db.invoices.map(i=>`<option value="${i.id}">${esc(i.invoiceNo)}</option>`).join('');invoiceList.innerHTML=db.invoices.map(i=>{let q=db.quotes.find(x=>x.id==i.quoteId)||{},bal=Math.max(0,(Number(i.total)||0)-(Number(i.paid)||0));return`<div class="item-card"><div><b>${esc(i.invoiceNo)}</b><small>${esc(clientName(q.clientId))} · ${esc(q.name)} · Balance ${money(bal)}</small></div><div class="actions"><button onclick="editInvoice(${i.id})">Edit</button><button onclick="printInvoice(${i.id})">PDF</button></div></div>`}).join('')||'<p class="muted">No invoices yet.</p>'}
 function editInvoice(id){invoiceSelect.value=id;loadInvoice()}
 function loadInvoice(){let i=db.invoices.find(x=>String(x.id)===String(invoiceSelect.value));if(!i)return;invoiceEditNo.value=i.invoiceNo;invoiceStatus.value=i.status;invoiceDue.value=i.dueDate||'';invoicePaid.value=i.paid||0;invoiceInstructions.value=i.instructions||''}
 function saveInvoice(){let i=db.invoices.find(x=>String(x.id)===String(invoiceSelect.value));if(!i)return alert('Select invoice');i.invoiceNo=invoiceEditNo.value;i.status=invoiceStatus.value;i.dueDate=invoiceDue.value;i.paid=Number(invoicePaid.value||0);i.instructions=invoiceInstructions.value;saveDB();toast('Invoice saved')}
 function printInvoiceSelected(){let i=db.invoices.find(x=>String(x.id)===String(invoiceSelect.value));if(!i)return alert('Select invoice');printInvoice(i.id)}
-function printInvoice(id){let i=db.invoices.find(x=>x.id==id),q=db.quotes.find(x=>x.id==i.quoteId);if(!i||!q)return;printScreen.innerHTML=proposalHTML(q,true,i);setTimeout(()=>window.print(),400)}
 function exportBackup(){let blob=new Blob([JSON.stringify({clients:db.clients,quotes:db.quotes,invoices:db.invoices},null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='PKT_CRM_Backup_'+new Date().toISOString().slice(0,10)+'.json';a.click();URL.revokeObjectURL(a.href)}
 function importBackup(e){let f=e.target.files[0];if(!f)return;let r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);db.clients=d.clients||[];db.quotes=d.quotes||[];db.invoices=d.invoices||[];saveDB();toast('Backup restored')}catch(err){alert('Could not restore backup')}};r.readAsText(f)}
 renderAll();
